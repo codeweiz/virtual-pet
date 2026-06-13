@@ -1,0 +1,57 @@
+# ─────────────────────────────────────────────────────────────
+# Tuist — generated artifacts (we generate, never commit, the project)
+# ─────────────────────────────────────────────────────────────
+*.xcodeproj
+*.xcworkspace
+!Tuist/**/*.xcworkspace          # (none expected, but be explicit)
+Derived/
+.tuist-version
+graph.png
+graph.dot
+
+# ─────────────────────────────────────────────────────────────
+# Swift Package Manager
+# ─────────────────────────────────────────────────────────────
+.build/
+.swiftpm/
+Package.resolved.backup
+
+# ─────────────────────────────────────────────────────────────
+# Xcode
+# ─────────────────────────────────────────────────────────────
+DerivedData/
+*.xcuserstate
+*.xcscmblueprint
+xcuserdata/
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+build/
+.previews/
+
+# ─────────────────────────────────────────────────────────────
+# macOS / tooling
+# ─────────────────────────────────────────────────────────────
+.DS_Store
+.netrc
+*.log
+
+# ─────────────────────────────────────────────────────────────
+# Fastlane
+# ─────────────────────────────────────────────────────────────
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output/
+
+# ─────────────────────────────────────────────────────────────
+# Secrets — never commit signing/keys
+# ─────────────────────────────────────────────────────────────
+*.p8
+*.p12
+*.mobileprovision
+.env
+.env.*
+!.env.example

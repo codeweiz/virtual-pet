@@ -1,0 +1,14 @@
+# Pinned developer toolchain. Run `mise install` to provision everything below
+# at the exact versions used in CI. This is the single source of truth for tool
+# versions — local machines, git hooks, and CI all resolve from here.
+#
+# NOTE: Xcode (26.5) and the Swift toolchain (6.3.2) come from the system Xcode,
+# not mise — see README for the supported Xcode range and why.
+
+[tools]
+tuist = "4.200.1"
+swiftlint = "0.63.3"
+
+[env]
+# Surface a friendly reminder of the expected Xcode for contributors / CI logs.
+EXPECTED_XCODE = "26.5"

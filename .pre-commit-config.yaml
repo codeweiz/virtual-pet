@@ -1,0 +1,35 @@
+# Git pre-commit hooks. Enable once with:  pre-commit install
+# Runs ONLY on staged files. Formatter auto-fixes; linter blocks the commit.
+#
+# Tool versions are pinned via mise.toml so local hooks == CI. The Swift hooks
+# below are `language: system`, i.e. they call the binaries already on PATH
+# (swift-format from the Xcode toolchain, swiftlint from mise) rather than
+# rebuilding them — fast and version-consistent.
+
+repos:
+  - repo: local
+    hooks:
+      - id: swift-format
+        name: swift-format (auto-fix)
+        entry: swift format --in-place
+        language: system
+        types: [swift]
+
+      - id: swiftlint
+        name: swiftlint (strict)
+        entry: swiftlint lint --strict --quiet
+        language: system
+        types: [swift]
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: end-of-file-fixer
+        exclude: '\.(pbxproj|xcfilelist)$'
+      - id: trailing-whitespace
+        exclude: '\.(pbxproj|md)$'
+      - id: check-yaml
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ["--maxkb=2048"]

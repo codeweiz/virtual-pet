@@ -1,0 +1,5 @@
+app_identifier("com.microboat.virtualpet")
+
+# Prefer env vars so secrets stay out of git (see .env.example).
+apple_id(ENV["ASC_APPLE_ID"])
+team_id(ENV["APPLE_TEAM_ID"])

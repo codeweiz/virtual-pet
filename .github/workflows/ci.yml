@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Pin the Xcode used to build/submit. Must be 26+ (iOS 26 SDK is mandatory for
+  # App Store submissions from April 2026). Keep in sync with mise.toml's note.
+  XCODE_VERSION: "26.5"
+
+jobs:
+  lint:
+    name: Lint & Format
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode ${{ env.XCODE_VERSION }}
+        run: sudo xcode-select -s "/Applications/Xcode_${{ env.XCODE_VERSION }}.app"
+      - name: Provision pinned tools (Tuist, SwiftLint)
+        uses: jdx/mise-action@v2
+      - name: SwiftLint (strict)
+        run: mise exec -- swiftlint lint --strict --reporter github-actions-logging
+      - name: swift-format (lint)
+        run: swift format lint --strict --recursive Modules Apps
+
+  build-test:
+    name: Build & Test
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode ${{ env.XCODE_VERSION }}
+        run: sudo xcode-select -s "/Applications/Xcode_${{ env.XCODE_VERSION }}.app"
+      - name: Provision pinned tools
+        uses: jdx/mise-action@v2
+      - name: Install xcbeautify
+        run: brew install xcbeautify
+      - name: Generate Xcode project
+        run: mise exec -- tuist generate --no-open
+      # Fast, signing-free domain tests (Swift Testing).
+      - name: Unit tests — PetKit (macOS)
+        run: |
+          xcodebuild test -workspace VirtualPet.xcworkspace -scheme PetKit \
+            -destination 'platform=macOS' \
+            -resultBundlePath TestResults-PetKit.xcresult \
+            CODE_SIGNING_ALLOWED=NO | xcbeautify --renderer github-actions
+      # Build each platform slice. macos-26 runners ship iOS + watchOS runtimes.
+      - name: Build — iOS app
+        run: |
+          xcodebuild build -workspace VirtualPet.xcworkspace -scheme PetApp \
+            -destination 'platform=iOS Simulator,name=iPhone 17,OS=latest' \
+            CODE_SIGNING_ALLOWED=NO | xcbeautify --renderer github-actions
+      - name: Build — watch app
+        run: |
+          xcodebuild build -workspace VirtualPet.xcworkspace -scheme PetWatchApp \
+            -destination 'platform=watchOS Simulator,name=Apple Watch Series 11 (46mm),OS=latest' \
+            CODE_SIGNING_ALLOWED=NO | xcbeautify --renderer github-actions
+      - name: Build — macOS app
+        run: |
+          xcodebuild build -workspace VirtualPet.xcworkspace -scheme PetApp \
+            -destination 'platform=macOS' \
+            CODE_SIGNING_ALLOWED=NO | xcbeautify --renderer github-actions
+      # EXTENSION POINTS: add a Periphery dead-code scan, snapshot tests, and a
+      # coverage gate (xccov) here as the codebase grows.

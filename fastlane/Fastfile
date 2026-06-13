@@ -1,0 +1,55 @@
+# Fastlane lanes. Run `bundle exec fastlane <lane>` (or `fastlane <lane>`).
+# The project is Tuist-generated, so every lane regenerates the workspace first.
+
+default_platform(:ios)
+
+WORKSPACE = "VirtualPet.xcworkspace".freeze
+
+platform :ios do
+  desc "Regenerate the Xcode project from the Tuist manifests"
+  lane :generate do
+    sh("cd .. && mise exec -- tuist generate --no-open")
+  end
+
+  desc "Run the unit-test suite (Swift Testing, signing-free, on macOS)"
+  lane :test do
+    generate
+    run_tests(
+      workspace: WORKSPACE,
+      scheme: "PetKit",
+      destination: "platform=macOS"
+    )
+  end
+
+  desc "Compile the iOS app for the simulator (no signing)"
+  lane :build do
+    generate
+    build_app(
+      workspace: WORKSPACE,
+      scheme: "PetApp",
+      skip_archive: true,
+      skip_codesigning: true,
+      destination: "generic/platform=iOS Simulator"
+    )
+  end
+
+  desc "Build a signed app and upload it to TestFlight"
+  lane :beta do
+    generate
+    # Requires signing + an App Store Connect API key — see .env.example.
+    api_key = app_store_connect_api_key(
+      key_id: ENV["ASC_KEY_ID"],
+      issuer_id: ENV["ASC_ISSUER_ID"],
+      key_filepath: ENV["ASC_API_KEY_PATH"]
+    )
+    build_app(workspace: WORKSPACE, scheme: "PetApp")
+    upload_to_testflight(api_key: api_key, skip_waiting_for_build_processing: true)
+  end
+
+  desc "Generate localized, framed App Store screenshots"
+  lane :screenshots do
+    capture_screenshots(workspace: WORKSPACE, scheme: "PetApp")
+    # frame_screenshots(white: true)
+    # upload_to_app_store(skip_binary_upload: true, skip_metadata: true)
+  end
+end

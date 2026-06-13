@@ -1,0 +1,71 @@
+# SwiftLint — semantic/style linting. FORMATTING (indentation, spacing, import
+# ordering, line breaks, trailing commas, brace placement) is owned by
+# swift-format; rules that overlap with it are disabled here so the two tools
+# never fight.
+
+disabled_rules:
+  - trailing_whitespace # swift-format owns
+  - trailing_comma # swift-format adds multi-element trailing commas
+  - opening_brace # swift-format owns brace placement on wrapped signatures
+  - todo # allow TODO/FIXME markers during active development
+
+opt_in_rules:
+  - empty_count
+  - empty_string
+  - empty_collection_literal
+  - first_where
+  - last_where
+  - contains_over_filter_count
+  - contains_over_first_not_nil
+  - force_unwrapping
+  - explicit_init
+  - closure_spacing
+  - toggle_bool
+  - prefer_self_type_over_type_of_self
+  - overridden_super_call
+  - fatal_error_message
+
+# Only run by `swiftlint analyze` (needs a compile DB); harmless under `lint`.
+analyzer_rules:
+  - unused_import
+
+line_length:
+  warning: 100
+  error: 140
+  ignores_comments: true
+  ignores_urls: true
+  ignores_function_declarations: true
+
+identifier_name:
+  min_length: 2
+  excluded: [id, x, y, z, dx, dy, to, up, ok, s, t, cx, cy, ex, mw]
+
+type_name:
+  max_length:
+    warning: 50
+    error: 60
+
+function_body_length:
+  warning: 80
+  error: 140
+
+function_parameter_count:
+  warning: 8
+  error: 10
+
+# SwiftUI view bodies and Tuist manifests legitimately get large/nested.
+type_body_length:
+  warning: 350
+  error: 500
+
+cyclomatic_complexity:
+  ignores_case_statements: true
+
+excluded:
+  - "**/.build"
+  - "**/Derived"
+  - "**/.tuist"
+  - "**/*.generated.swift"
+  - "Tuist/.build"
+
+reporter: "xcode"
