@@ -23,20 +23,31 @@ let allDeploy: DeploymentTargets = .multiplatform(iOS: "26.0", macOS: "26.0", wa
 let phoneMacDeploy: DeploymentTargets = .multiplatform(iOS: "26.0", macOS: "26.0")
 let watchDeploy: DeploymentTargets = .watchOS("26.0")
 
+// Automatic signing for device builds (ignored on the simulator with
+// CODE_SIGNING_ALLOWED=NO). Team = the Apple Developer team that owns the certs.
+let signing: [String: SettingValue] = [
+    "DEVELOPMENT_TEAM": "Z89YV44V6R",
+    "CODE_SIGN_STYLE": "Automatic",
+]
+
 // Core packages: Swift 6 strict concurrency, NO forced main-actor isolation.
-let coreSettings = Settings.settings(base: [
-    "SWIFT_VERSION": "6.0",
-    "SWIFT_STRICT_CONCURRENCY": "complete",
-    "SWIFT_APPROACHABLE_CONCURRENCY": "YES",
-])
+let coreSettings = Settings.settings(
+    base: [
+        "SWIFT_VERSION": "6.0",
+        "SWIFT_STRICT_CONCURRENCY": "complete",
+        "SWIFT_APPROACHABLE_CONCURRENCY": "YES",
+    ].merging(signing) { _, new in new }
+)
 
 // UI / app targets: also default to MainActor isolation (approachable concurrency).
-let uiSettings = Settings.settings(base: [
-    "SWIFT_VERSION": "6.0",
-    "SWIFT_STRICT_CONCURRENCY": "complete",
-    "SWIFT_APPROACHABLE_CONCURRENCY": "YES",
-    "SWIFT_DEFAULT_ACTOR_ISOLATION": "MainActor",
-])
+let uiSettings = Settings.settings(
+    base: [
+        "SWIFT_VERSION": "6.0",
+        "SWIFT_STRICT_CONCURRENCY": "complete",
+        "SWIFT_APPROACHABLE_CONCURRENCY": "YES",
+        "SWIFT_DEFAULT_ACTOR_ISOLATION": "MainActor",
+    ].merging(signing) { _, new in new }
+)
 
 // MARK: - Factories
 
@@ -151,6 +162,8 @@ let targets: [Target] = [
             .target(name: "FeaturePetHome"),
             .target(name: "VisualFX"),
             .target(name: "PetRendererRive"),
+            // Embeds the WidgetKit extension (Home/Lock widgets + Live Activity).
+            .target(name: "PetWidgets"),
             // Direct dep so the RiveRuntime binary framework is embedded in the
             // app bundle (transitive SPM binary frameworks aren't auto-embedded).
             .package(product: "RiveRuntime"),
